@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+    </style>
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <script>
+        document.write('<style>html{font-size:'+((window.innerWidth/75)>10?10:(window.innerWidth/75))+'px;}</style>');
+    </script>
 </head>
-<body style="background: white;">
-    <h1>Hello World!</h1>
-    <p>
-        We are using node <script>document.write(process.versions.node)</script>,
-        Chrome <script>document.write(process.versions.chrome)</script>,
-        and Electron <script>document.write(process.versions.electron)</script>.
-    </p>
+<body>
+    <div id="app"></div>
 </body>
 </html>

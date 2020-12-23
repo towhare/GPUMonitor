@@ -4,7 +4,9 @@
   "description": "used for monitor my own gpu",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dev": "webpack-dev-server --host 0.0.0.0 --port 8081 --config build/webpack.config.dev.js",
+    "build": "webpack --mode production --progress --config build/webpack.config.build.js"
   },
   "keywords": [
     "gpu",
@@ -13,9 +15,44 @@
   "author": "towrabbit",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.17.1"
+    "axios": "^0.19.2",
+    "express": "^4.17.1",
+    "nipplejs": "^0.8.5",
+    "socket.io": "^3.0.4",
+    "socket.io-client": "^3.0.4",
+    "three": "^0.115.0",
+    "vant": "^2.5.2",
+    "vue": "2.6.10",
+    "vue-i18n": "^8.15.2",
+    "vue-router": "^3.0.2"
   },
   "devDependencies": {
-    "electron": "^11.1.1"
+    "electron": "^11.1.1",
+    "node-sass": "^4.13.1",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.4",
+    "babel-plugin-import": "^1.13.0",
+    "copy-webpack-plugin": "^4.6.0",
+    "css-loader": "^2.0.1",
+    "eslint": "^5.11.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1",
+    "url-loader": "^1.1.2",
+    "vue-loader": "^15.4.2",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "2.6.10",
+    "webpack": "^4.28.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10"
   }
 }
