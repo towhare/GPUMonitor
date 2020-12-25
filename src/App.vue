@@ -1,23 +1,36 @@
 <template>
   <div class="full-width center-content">
       <div class="gpuInfo">
-          {{gpuInfo}}
+          <span>总显存{{gpuInfo.gpuTotalMemory}}MB,已用{{gpuInfo.gpuMemoryUsed}}MB,可用{{gpuInfo.gpuMemoryAvailable}}MB,温度{{gpuInfo.gpuTemperature}}°,使用率{{gpuInfo.gpuUsage}}%</span>
       </div>
-    
+      <temprature-bar name="" :percent="20" class="memory" :total="gpuInfo.gpuTotalMemory" :current="gpuInfo.gpuMemoryUsed" />
+      <percentage :percent="gpuInfo.gpuUsage" class="usage" />
   </div>
 </template>
 
 <script>
 import io from 'socket.io-client';
 import axios from 'axios';
+
+import Bar from './component/tempratureBar.vue';
+import Percentage from './component/circle.vue';
 export default {      
   components: {
-
+    "temprature-bar":Bar,
+    "percentage":Percentage
   },
   data: () =>{
     return {
         name:'towrabbit',
-        gpuInfo:''
+        gpuInfo:{
+            gpuTotalMemory:0,
+            gpuMemoryUsed:0,
+            gpuMemoryAvailable:0,
+            gpuTemperature:0,
+            gpuUsage:0
+        },
+        temperature:0,
+        usage:0
     }
   },
   computed:{
@@ -39,8 +52,17 @@ export default {
         this.socket.on("hello", (message) => {
             console.log("message",message)
         })
+
         this.socket.on("gpuInfo", (info) => {
-            this.gpuInfo = info;
+            this.gpuInfo.gpuTotalMemory = info.gpuTotalMemory;
+            this.gpuInfo.gpuMemoryUsed = info.gpuMemoryUsed;
+            this.gpuInfo.gpuMemoryAvailable = info.gpuMemoryAvailable;
+            this.gpuInfo.gpuTemperature = info.gpuTemperature;
+            this.gpuInfo.gpuUsage = info.gpuUsage;
+        })
+
+        this.socket.on("temperature", (temperature) => {
+            this.temperature = temperature;
         })
 
   },
@@ -60,18 +82,34 @@ export default {
     box-sizing:border-box;
 }
 .full-width{
-    display:flex;
-    justify-content: center;
-    align-items:center;
     background-color: #222266;
     width:100vw;
     height:100vh;
+    .memory{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform: translate(-50%,-50%);
+    }
+    .usage{
+        position:absolute;
+        top:50%;
+        transform: translate(-50%,-50%);
+        left:calc( 50% - 150px );
+    }
 }
 .gpuInfo{
-    font-size:40px;
+    font-size:30px;
+    font-weight: 100;
     color:white;
-    text-shadow:1px chartreuse;
+    text-shadow:0px 0px 5px #53e5ff;;
     text-align:center;
-    
+    display:flex;
+    justify-content: center;
+    align-items:center;
+    position:absolute;
+    bottom:100px;
+    width: 100%;
 }
+
 </style>
