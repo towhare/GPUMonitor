@@ -25,7 +25,7 @@ httpServer.listen(3001);
 
 
 /** 按顺序 获取总内存 已用内存 可用内存 温度 gpu占用百分比 */
-const gpuCommand = 'nvidia-smi --format=csv,noheader --query-gpu=memory.total,memory.used,memory.free,temperature.gpu,utilization.gpu';
+const gpuCommand = 'nvidia-smi --format=csv,noheader --query-gpu=memory.total,memory.used,memory.free,temperature.gpu,utilization.gpu,encoder.stats.averageLatency';
 
 async function getGPUTemperature() {
     const result = await execAsync(gpuCommand, {
