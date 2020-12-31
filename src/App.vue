@@ -1,6 +1,6 @@
 <template>
   <div class="full-width center-content">
-    <three-background class="background" />
+    <three-background class="background" :speed="Math.max(Math.min((gpuInfo.gpuUsage)/20,5),1)" />
     <div class="gpuInfo">
       <span
         >总显存{{ gpuInfo.gpuTotalMemory }}MB,已用{{
