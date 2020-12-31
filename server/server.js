@@ -7,7 +7,7 @@ const execAsync = promisify(exec);
 
 const io = require("socket.io")(httpServer,{
     cors: {
-        origin: "http://localhost:8081",
+        origin: ["http://localhost:8081","http://localhost:3333"],
         methods: ["GET", "POST"],
         allowedHeaders: ["Access-Control-Allow-Origin"],
         credentials: true
@@ -27,13 +27,15 @@ httpServer.listen(3001);
 /** 按顺序 获取总内存 已用内存 可用内存 温度 gpu占用百分比 */
 const gpuCommand = 'nvidia-smi --format=csv,noheader --query-gpu=memory.total,memory.used,memory.free,temperature.gpu,utilization.gpu,encoder.stats.averageLatency';
 
+const options = {
+    env: {
+        ...process.env,
+        Path: 'C:\\Program Files\\NVIDIA Corporation\\NVSMI\\'
+    },
+    windowsHide:true
+}
 async function getGPUTemperature() {
-    const result = await execAsync(gpuCommand, {
-        env: {
-            ...process.env,
-            Path: 'C:\\Program Files\\NVIDIA Corporation\\NVSMI\\'
-        }
-    });
+    const result = await execAsync(gpuCommand, options);
     if(result.stdout){
         let dataArray = result.stdout.replace('\r\n','').split(', ');
         console.log('result.stdout',result.stdout);
@@ -61,12 +63,7 @@ async function getGPUTemperature() {
  * @returns {number|null} temperature 
  */
 async function getTemperature(){
-    const result = await execAsync(`nvidia-smi --format=csv,noheader --query-gpu=temperature.gpu`,{
-        env:{
-            ...process.env,
-            Path:'C:\\Program Files\\NVIDIA Corporation\\NVSMI\\'
-        }
-    });
+    const result = await execAsync(`nvidia-smi --format=csv,noheader --query-gpu=temperature.gpu`,options);
     if(result.stdout){
         const data = Number(result.stdout.replace('\r\n',''));
         if(data){
