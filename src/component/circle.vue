@@ -48,6 +48,7 @@ export default {
   .number{
     display: block;
     color:white;
+    font-size:18px;
   }
   .innerCircle{
     position:absolute;

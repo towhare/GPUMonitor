@@ -1,7 +1,10 @@
 <template>
   <div class="full-width center-content">
+    <!-- 背景 -->
     <three-background class="background" :speed="Math.max(Math.min((gpuInfo.gpuUsage)/20,5),1)" />
+    <!-- GPU信息 -->
     <div class="gpuInfo">
+      <span>{{socketConneted?'已连接':'未连接'}} </span>
       <span
         >总显存{{ gpuInfo.gpuTotalMemory }}MB,已用{{
           gpuInfo.gpuMemoryUsed
@@ -10,7 +13,7 @@
         }}°,使用率{{ gpuInfo.gpuUsage }}%</span
       >
     </div>
-
+    
     <temprature-bar
       name=""
       :percent="20"
@@ -45,6 +48,7 @@ export default {
         gpuTemperature: 0,
         gpuUsage: 0,
       },
+      socketConneted:false,
       temperature: 0,
       usage: 0,
     };
@@ -55,10 +59,12 @@ export default {
     this.socket = io("http://localhost:3001");
     this.socket.on("connect", (item) => {
       console.log("socket connected", this.socket.id);
+      this.socketConneted = true;
     });
 
     this.socket.on("disconnect", () => {
       console.log("disconnected", this.socket.id);
+      this.socketConneted = false;
     });
 
     this.socket.on("hello", (message) => {
