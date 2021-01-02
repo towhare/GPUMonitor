@@ -1,7 +1,11 @@
 <template>
   <div class="full-width center-content">
     <!-- 背景 -->
-    <three-background class="background" :speed="Math.max(Math.min((gpuInfo.gpuUsage)/20,5),1)" />
+    <three-background class="background" 
+      :speed="Math.max(Math.min((gpuInfo.gpuUsage)/20,5),1)" 
+      :playing="backgroundPlaying"
+    />
+    <van-switch v-model="backgroundPlaying" class="backgroundPlaying"/>
     <!-- GPU信息 -->
     <div class="gpuInfo">
       <span>{{socketConneted?'已连接':'未连接'}} </span>
@@ -12,6 +16,7 @@
           gpuInfo.gpuTemperature
         }}°,使用率{{ gpuInfo.gpuUsage }}%</span
       >
+      
     </div>
     
     <temprature-bar
@@ -32,6 +37,20 @@ import axios from "axios";
 import Bar from "./component/tempratureBar.vue";
 import Percentage from "./component/circle.vue";
 import THREEBackgrond from "./component/textBackground.vue";
+
+
+var wallpaperPropertyListener = {
+    applyUserProperties: function(properties) {
+        if (properties.yourproperty) {
+            // Do something with yourproperty
+        }
+        if (properties.anotherproperty) {
+            // Do something with anotherproperty
+        }
+        // Add more properties here
+    },
+};
+
 export default {
   components: {
     "temprature-bar": Bar,
@@ -51,6 +70,7 @@ export default {
       socketConneted:false,
       temperature: 0,
       usage: 0,
+      backgroundPlaying:true
     };
   },
   computed: {},
@@ -98,6 +118,11 @@ export default {
   background-color: #222266;
   width: 100vw;
   height: 100vh;
+  .backgroundPlaying{
+    position:absolute;
+    top:20px;
+    right:30px;
+  }
   .background{
     position:fixed;
     top:0;

@@ -24,6 +24,10 @@ export default {
     FPS:{
       type:Number,
       default:60
+    },
+    playing:{
+      type:Boolean,
+      default:true
     }
   },
   /**
@@ -36,7 +40,17 @@ export default {
     };
   },
   computed: {},
-  watch: {},
+  watch: {
+    playing(value){
+      if(value){
+        this.loadCubeGroupPosition();
+        this.clock.start();
+      } else {
+        this.saveCubeGroupPosition();
+        this.clock.stop();
+      }
+    }
+  },
   mounted: function() {
     window.onfocus = ()=>{
       this.active = true;
@@ -114,6 +128,7 @@ export default {
     initScene(){
       this.scene = new THREE.Scene();
     },
+  
     initCubes(){
       const cube = new THREE.Mesh(
         new THREE.BoxBufferGeometry(0.1,0.1,0.1),
@@ -142,7 +157,7 @@ export default {
     animate(){
       
       requestAnimationFrame(this.animate);
-      if(!this.active) return;
+      if(!this.active || !this.playing) return;
       const delta = this.clock.getDelta();
       const t = this.clock;
       this.updateCubeGroup(delta);
@@ -153,6 +168,7 @@ export default {
         this.timeStamp = (this.timeStamp % (1/this.FPS));
       }
     },
+    /** 保存当前位置状态 */
     saveCubeGroupPosition(){
       if(this.cubeGroup && this.cubeGroup2){
         this.cubeGroup1Y = this.cubeGroup.position.y;
