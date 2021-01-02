@@ -1,3 +1,8 @@
+### important
+- only can be used with nvidia-smi installed
+- 因为获取gpu信息是通过nvidia-smi命令行 所以确保你的电脑上有nvidia-smi
+- windows 10系统来说 nvidia-smi 一般在 `C:\\Program Files\\NVIDIA Corporation\\NVSMI\\`这个文件夹里
+
 ### 功能点
 - 解析 nvidia-smi的内容 并且展示出来
 - 解析完毕的内容 通过websocket发送到网页端
