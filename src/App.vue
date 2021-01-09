@@ -16,9 +16,7 @@
           gpuInfo.gpuTemperature
         }}°,使用率{{ gpuInfo.gpuUsage }}%</span
       >
-      
     </div>
-    
     <temprature-bar
       name=""
       :percent="20"
@@ -27,6 +25,9 @@
       :current="gpuInfo.gpuMemoryUsed"
     />
     <percentage :percent="gpuInfo.gpuUsage" class="usage" />
+    <div class="cpus">
+      <core v-for="(item,i) in cpuInfo" :key="i" :percent="item.percent"/>
+    </div>
   </div>
 </template>
 
@@ -36,6 +37,7 @@ import axios from "axios";
 
 import Bar from "./component/tempratureBar.vue";
 import Percentage from "./component/circle.vue";
+import Core from "./component/core.vue";
 import THREEBackgrond from "./component/textBackground.vue";
 
 
@@ -57,6 +59,7 @@ export default {
     "temprature-bar": Bar,
     percentage: Percentage,
     "three-background": THREEBackgrond,
+    "core":Core,
   },
   data: () => {
     return {
@@ -68,6 +71,11 @@ export default {
         gpuTemperature: 0,
         gpuUsage: 0,
       },
+      cpuInfo:[
+        {
+          percent:0,
+        }
+      ],
       socketConneted:false,
       temperature: 0,
       usage: 0,
@@ -103,6 +111,16 @@ export default {
     this.socket.on("temperature", (temperature) => {
       this.temperature = temperature;
     });
+
+    this.socket.on("cpuInfo",(cpuInfo)=>{
+      const newCpuInfo = [];
+      for(let cpu of cpuInfo){
+        newCpuInfo.push({
+          percent:Math.round((cpu.used/cpu.all)*100)
+        })
+      }
+      this.cpuInfo = newCpuInfo;
+    })
   },
 
   methods: {},
@@ -140,6 +158,12 @@ export default {
     top: 50%;
     transform: translate(-50%, -50%);
     left: calc(50% - 150px);
+  }
+  .cpus{
+    position:absolute;
+    top:50%;
+    transform: translate(0,-50%);
+    right:20px;
   }
 }
 .gpuInfo {
