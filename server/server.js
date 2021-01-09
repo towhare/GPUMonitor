@@ -14,8 +14,6 @@ const io = require("socket.io")(httpServer,{
     }
 });
 
-
-
 httpServer.listen(3001);
 
 
@@ -38,7 +36,6 @@ async function getGPUTemperature() {
     const result = await execAsync(gpuCommand, options);
     if(result.stdout){
         let dataArray = result.stdout.replace('\r\n','').split(', ');
-        console.log('result.stdout',result.stdout);
         // 如果是不支持的内容 则会显示[Not Supported];
         let gpuInfo = {};
         let gpuTotalMemory = Number(dataArray[0].replace(' MiB',''));

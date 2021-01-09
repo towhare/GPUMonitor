@@ -41,6 +41,7 @@ import THREEBackgrond from "./component/textBackground.vue";
 
 var wallpaperPropertyListener = {
     applyUserProperties: function(properties) {
+      console.log('',properties)
         if (properties.yourproperty) {
             // Do something with yourproperty
         }

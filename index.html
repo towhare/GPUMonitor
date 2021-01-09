@@ -6,12 +6,13 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
     </style>
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <script>
-        document.write('<style>html{font-size:'+((window.innerWidth/75)>10?10:(window.innerWidth/75))+'px;}</style>');
-    </script>
+    <title>GPUMONITOR</title>
 </head>
 <body>
     <div id="app"></div>
+    <div>
+        服务器已启动
+        <a href="http://localhost:3333/GPUMonitor" target="blank">localhost:3333/GPUMonitor</a>
+    </div>
 </body>
 </html>
