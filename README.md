@@ -27,3 +27,6 @@ npm run dev
 ### 与wallpaperengine配合
 - wallpaper engine 有开放的api 可以获取一些在配置项中的属性信息或者自己定制一个属性信息
 - 这些信息可以被通过更改引擎信息读取 并且可以通过一些特定的事件名来获取到。
+
+### list
+- 加了一个点划 线

@@ -85,7 +85,7 @@ export default {
   computed: {},
   watch: {},
   mounted: function () {
-    this.socket = io("http://localhost:3001");
+    this.socket = io("http://192.168.1.5:3001");
     this.socket.on("connect", (item) => {
       console.log("socket connected", this.socket.id);
       this.socketConneted = true;

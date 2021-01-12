@@ -13,6 +13,7 @@ module.exports = {
 	mode: 'development',
 	entry: {
 		'index':'./src/app.js',
+		'dashline':'./src/dashline.js'
 	},
 	devServer: {
 		//hot: true,
@@ -74,6 +75,16 @@ module.exports = {
 			//chunks: ['index'],
 			inject: true,
 			title: 'GPU监控'
+		}),
+		new HtmlWebpackPlugin({
+			filename: 'dashline/index.html',
+			template: 'template.html',
+			inject: 'body',
+			chunks: [ 'dashline' ],
+			title: '点划线',
+			options: {
+				title:'点划线'
+			}
 		}),
 		new CopyWebpackPlugin([{
 			from: resolve('static/img'),

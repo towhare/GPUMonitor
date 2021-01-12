@@ -11,9 +11,10 @@ function resolve (dir) {
 }
 module.exports = {
 	mode: 'development',
-	entry: [
-		'./src/app.js'
-	],
+	entry: {
+		'index':'./src/app.js',
+		'dashline/dashline':'./src/dashline.js'
+	},
 	devServer: {
 		hot: true,
 		watchOptions: {
@@ -65,6 +66,17 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			filename: 'index.html',
 			template: 'index.html',
+			inject: true
+		}),
+		new HtmlWebpackPlugin({
+			filename: 'dashline/index.html',
+			template: 'template.html',
+			inject: 'body',
+			chunks: [ 'dashline/dashline' ],
+			title: '点划线',
+			options: {
+				title:'点划线'
+			},
 			inject: true
 		}),
 		new CopyWebpackPlugin([{

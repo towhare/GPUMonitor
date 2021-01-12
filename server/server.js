@@ -11,7 +11,7 @@ const startCPUs = os.cpus();
 let oldCPUs = getCPUsCurrent();
 const io = require("socket.io")(httpServer,{
     cors: {
-        origin: ["http://localhost:8081","http://localhost:3333"],
+        origin: ["http://localhost:8081","http://localhost:3333","http://192.168.1.5:3333"],
         methods: ["GET", "POST"],
         allowedHeaders: ["Access-Control-Allow-Origin"],
         credentials: true
