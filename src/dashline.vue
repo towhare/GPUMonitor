@@ -141,7 +141,7 @@ export default {
     // 新增虚线线条
     initDashLine(){
       //创建路径 此处为圆形
-      let pointsNumber = 50;
+      let pointsNumber = 500;
       let curve = new THREE.EllipseCurve(
         0,0,
         3,3,
@@ -166,7 +166,6 @@ export default {
     );
       let points2 = cubeBezierCurve.getPoints(80);
 
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
       const geometry2 = new LineGeometry();
       let positions = [];
       let colors = [];
@@ -189,31 +188,61 @@ export default {
       
       const lineMaterial = new LineMaterial({
         color:0xff00ff,//设置颜色
-        linewidth:3,
-        dashed:true,
-        dashScale:2
+        linewidth:3,// 宽度
+        dashScale:2,
+        dashSize:2, // 复制的总长 2个单位一个循环
+        dashOffset:0,
+        lines:[0.1,0.4,0.5,0.8] // 指的是在0.1-0.4  0.5 -0.8中间挖空 最终的结果是 长度
+        // 总长为2个单位 类似于 [-   -   ------------]
       })
-      lineMaterial.dashed = true;
-      if ( true ) lineMaterial.defines.USE_DASH = "";
+      
+      
+      lineMaterial.resolution.set(window.innerWidth,window.innerHeight); //将界面的宽高传进去对宽度至关重要
+      lineMaterial.defines.USE_DASH = "";// 是否设置为点划线
+      lineMaterial.needsUpdate = true;
+      
+
+      const lineMaterial2 = new LineMaterial({
+        color:0xcccc00,// 黄色
+        linewidth:2,// 宽度
+        dashScale:5,//越大越密集 默认值为1
+        dashSize:5,
+        dashOffset:0,//偏移量
+        lines:[
+          0.5,1.0,
+          1.2,1.7,
+          1.9,2.4
+        ] // 在0.5-1.0 1.2-1.7 1.9-2.4之间挖空 类似于[--  -  -  ---------------]
+      })
+      lineMaterial2.defines.USE_DASH = "";// 设置为点划线
+      lineMaterial2.resolution.set(window.innerWidth,window.innerHeight);
+      lineMaterial2.needsUpdate = true;
+
 
       const dashedMaterial = new THREE.LineDashedMaterial( { scale: 2, dashSize: 1, gapSize: 1 } );
-      lineMaterial.resolution.set(window.innerWidth,window.innerHeight);
-      lineMaterial.needsUpdate = true;
-
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-      geo.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+      
 
       this.line = new Line2(geometry2,lineMaterial);
       this.line.computeLineDistances();
       this.line.scale.set(1,1,1);
       this.scene.add(this.line);
 
-      let line2 = new Line2(geometry3, lineMaterial);
+      // 第二条贝塞尔曲线
+      
+      console.log('添加第二条曲线');
+      let line2 = new Line2(geometry3, lineMaterial2);
       line2.computeLineDistances();
       line2.scale.set(1,1,1);
       this.scene.add(line2);
-      console.log('添加第二条曲线');
+      const material3 = lineMaterial2.clone();
+      material3.color = new THREE.Color(0x0033ee);//复制并且更改颜色
+      this.lineMaterial = material3;
+
+      console.log('添加第三条曲线');
+      let line3 = new Line2(geometry3, material3);
+      line3.computeLineDistances();
+      line3.rotation.set(0.3,0.3,0.3);
+      this.scene.add(line3);
     },
   
     initCubes(){
@@ -244,10 +273,13 @@ export default {
     animate(){
       
       requestAnimationFrame(this.animate);
-      if(!this.active || !this.playing) return;
+      //if(!this.active || !this.playing) return;
       const delta = this.clock.getDelta();
       const t = this.clock;
-      //this.updateCubeGroup(delta);
+
+      if(this.lineMaterial){
+        this.lineMaterial.dashOffset+=0.04;
+      }
       this.timeStamp += delta;
       if (this.timeStamp > (1/this.FPS)) {
         this.stats.update();

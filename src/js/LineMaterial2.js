@@ -19,9 +19,12 @@ import {
  *  dashSize: <float>,
  *  dashOffset: <float>,
  *  gapSize: <float>,
+ *  lines: <Vector2[]>,
  *  resolution: <Vector2>, // to be set by renderer
  * }
  */
+const positionData = [0.1,0.25,0.3,0.45]
+const positionArray = new Float32Array(positionData);
 
 UniformsLib.line = {
 
@@ -31,8 +34,9 @@ UniformsLib.line = {
 	dashSize: { value: 1 },
 	dashOffset: { value: 0 },
 	gapSize: { value: 1 }, // todo FIX - maybe change to totalSize
-	opacity: { value: 1 }
-
+	opacity: { value: 1 },
+	lines: { value: positionArray },
+	lineNumber: { value: 2 }
 };
 
 ShaderLib[ 'line' ] = {
@@ -50,7 +54,7 @@ ShaderLib[ 'line' ] = {
 		#include <fog_pars_vertex>
 		#include <logdepthbuf_pars_vertex>
 		#include <clipping_planes_pars_vertex>
-
+		
 		uniform float linewidth;
 		uniform vec2 resolution;
 
@@ -192,6 +196,12 @@ ShaderLib[ 'line' ] = {
 
 	fragmentShader:
 		`
+		#define MAX_DASHLINE 128
+
+		uniform int lineNumber;
+		uniform float linewidth;
+		uniform vec2 lines[MAX_DASHLINE];
+
 		uniform vec3 diffuse;
 		uniform float opacity;
 
@@ -199,7 +209,6 @@ ShaderLib[ 'line' ] = {
 
 			uniform float dashSize;
 			uniform float dashOffset;
-			uniform float gapSize;
 
 		#endif
 
@@ -226,11 +235,19 @@ ShaderLib[ 'line' ] = {
         float value3 = 0.45;
         float value4 = 0.75;
         float value5 = 0.8;
-        float value6 = 1.0;
+				float value6 = 1.0;
+				
+				vec2 fff[2] = vec2[](vec2(0.0,0.1),vec2(0.8,1.1));
 
-        float compareValue = mod( vLineDistance + dashOffset, dashSize + gapSize );
+				float compareValue = mod( vLineDistance + dashOffset, dashSize );
+				
+				for(int i = 0; i < lineNumber; i++) {
+					/* Do Some Calculation */
+					vec2 v = lines[i];
+					if(compareValue > v.x && compareValue < v.y) discard;
+				}
         //if ( compareValue > dashSize ) discard;
-        if ( (compareValue > value1 && compareValue < value2) || ( ( compareValue > value3 ) && ( compareValue < value4 ) ) || (compareValue > value5 && compareValue < value6) ) discard;
+        //if ( (compareValue > value1 && compareValue < value2) || ( ( compareValue > value3 ) && ( compareValue < value4 ) ) || (compareValue > value5 && compareValue < value6) ) discard;
 				//if ( mod( vLineDistance + dashOffset, dashSize + gapSize ) > dashSize ) discard; // todo - FIX
 
 			#endif
@@ -404,6 +421,51 @@ var LineMaterial = function ( parameters ) {
 
 			}
 
+		},
+		// 线段的数值
+		lineNumber: {
+
+			enumerable: true,
+
+			get: function () {
+
+				return this.uniforms.lineNumber.value;
+
+			},
+
+			set: function ( value ) {
+
+				this.uniforms.lineNumber.value = value;
+
+			}
+
+		},
+		
+
+		// 线段挖掉的部分
+
+		lines:{
+			enumerable:true,
+			
+			get: function () {
+
+				return this.uniforms.lines.value;
+
+			},
+
+			set: function ( value ) {
+
+				if( value instanceof Array ) {
+
+					const arr = new Float32Array(value);
+
+					const length = Math.round((arr.length)/2);
+					this.uniforms.lineNumber.value = length;
+					this.uniforms.lines.value = arr;
+
+				}
+
+			}
 		},
 
 		resolution: {
