@@ -29,4 +29,4 @@ npm run dev
 - 这些信息可以被通过更改引擎信息读取 并且可以通过一些特定的事件名来获取到。
 
 ### list
-- 加了一个点划 线
+- 加了一个点划 线 点划线的查看位置为 [localhost:8081/dashline/](localhost:8081/dashline/)
