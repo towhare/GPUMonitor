@@ -25,7 +25,6 @@ export default {
   },
   watch:{
     percent(val){
-      console.log('percenter val',val);
       this.styleObject.width = ''+(val)+'px';
       this.styleObject.height = ''+(val)+'px';
       this.styleObject.backgroundColor = 'rgba('+(Math.floor(214*(val/100))+30)+', '+(30+ Math.floor( (208)*((100-val)/100) ) )+', 30, 0.5)'

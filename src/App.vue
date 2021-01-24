@@ -24,6 +24,12 @@
       :total="gpuInfo.gpuTotalMemory"
       :current="gpuInfo.gpuMemoryUsed"
     />
+    <temprature-bar
+      name="ramInformation"
+      class="ram"
+      :total="memoryInfo.total"
+      :current="memoryInfo.used"
+    />
     <percentage :percent="gpuInfo.gpuUsage" class="usage" />
     <div class="cpus">
       <core v-for="(item,i) in cpuInfo" :key="i" :percent="item.percent"/>
@@ -76,6 +82,11 @@ export default {
           percent:0,
         }
       ],
+      memoryInfo:{
+        total:0,
+        used:0,
+
+      },
       socketConneted:false,
       temperature: 0,
       usage: 0,
@@ -85,7 +96,8 @@ export default {
   computed: {},
   watch: {},
   mounted: function () {
-    this.socket = io("http://192.168.1.5:3001");
+    const MB = 1024*1024;
+    this.socket = io("http://192.168.1.12:3001");
     this.socket.on("connect", (item) => {
       console.log("socket connected", this.socket.id);
       this.socketConneted = true;
@@ -107,6 +119,11 @@ export default {
       this.gpuInfo.gpuTemperature = info.gpuTemperature;
       this.gpuInfo.gpuUsage = info.gpuUsage;
     });
+
+    this.socket.on("ramInfo",info => {
+      this.memoryInfo.total = Math.floor(info.total/MB);
+      this.memoryInfo.used = Math.floor(info.used/MB);
+    })
 
     this.socket.on("temperature", (temperature) => {
       this.temperature = temperature;
@@ -152,6 +169,12 @@ export default {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+  }
+  .ram{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform: translate(55%,-50%);
   }
   .usage {
     position: absolute;

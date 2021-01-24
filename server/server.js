@@ -11,7 +11,7 @@ const startCPUs = os.cpus();
 let oldCPUs = getCPUsCurrent();
 const io = require("socket.io")(httpServer,{
     cors: {
-        origin: ["http://localhost:8081","http://localhost:3333","http://192.168.1.5:3333"],
+        origin: ["http://localhost:8081","http://localhost:3333","http://192.168.1.5:3333",'http://192.168.1.12:3333'],
         methods: ["GET", "POST"],
         allowedHeaders: ["Access-Control-Allow-Origin"],
         credentials: true
@@ -102,6 +102,22 @@ class CPUInfo{
         return changedCpus;
     }
 }
+const systemTotalMemory = os.totalmem();
+
+const getRaminfo = function(){
+    const freeMem = os.freemem();
+    const memUsed = (systemTotalMemory - freeMem);
+    const memPercent = memUsed/systemTotalMemory;
+
+    return {
+        percent:memPercent,
+        free: freeMem,
+        used: memUsed,
+        total: systemTotalMemory
+    }
+    
+}
+
 const cpuInfomation = () => {
     const changedCpus = getChangedCpus();
     //console.log('changedCpus',changedCpus)
@@ -172,22 +188,31 @@ io.on('connection', socket => {
         socket.emit('cpuInfo',cpus);
     }
 
+    let pushRamInformation = () => {
+        const mem = getRaminfo();
+        socket.emit('ramInfo', mem);
+    }
+
     
     const intervalId = setInterval(pushGPUInfomation, 1000);
-    const cpuIntervalId = setInterval(pushCPUInformation,1000);
+    const cpuIntervalId = setInterval(pushCPUInformation, 1000);
+    const ramIntervalId = setInterval(pushRamInformation, 1000);
 
     pool[socket.id] = {
         intervalId,
-        cpuIntervalId
+        cpuIntervalId,
+        ramIntervalId
     }
 
     socket.on('disconnect',function(){
         console.log('用户断开连接');
         if(pool[socket.id] && pool[socket.id].intervalId){
-            console.log('清除循环');
             clearInterval(pool[socket.id].intervalId);
-            if(typeof pool[socket.id].cpuIntervalId === 'number'){
+            if(pool[socket.id].cpuIntervalId){
                 clearInterval(pool[socket.id].cpuIntervalId);
+            }
+            if(pool[socket.id].ramIntervalId){
+                clearInterval(pool[socket.id].ramIntervalId);
             }
         }
     });

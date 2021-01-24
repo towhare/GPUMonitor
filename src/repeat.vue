@@ -89,11 +89,11 @@ export default {
     )
     //this.scene.add(this.cube);
     this.initCubes();
-    this.initDashLine();
     console.log('this.scene',this.scene)
     this.stats = new Stats();
     this.$refs.threeContainer.appendChild( this.stats.dom );
     this.initControls();
+    this.initSpecialMaterial();
     this.animate();
     this.timeStamp = 0;
     
@@ -138,113 +138,6 @@ export default {
         this.controls = new OrbitControls(this.camera,this.renderer.domElement);
       }
     },
-    // 新增虚线线条
-    initDashLine(){
-      //创建路径 此处为圆形
-      let pointsNumber = 500;
-      let curve = new THREE.EllipseCurve(
-        0,0,
-        3,3,
-        0, 2*Math.PI,
-        false,
-        0
-      )
-      let curve3 = new THREE.EllipseCurve(
-        0,0,
-        6,6,
-        0, 2*Math.PI,
-        false,
-        0
-      )
-      let points = curve.getPoints(pointsNumber);
-
-      let cubeBezierCurve = new THREE.CubicBezierCurve3(
-      new THREE.Vector3( -5, 0, 4 ),
-      new THREE.Vector3( -3, 2, 0 ),
-      new THREE.Vector3( 5, 2, 0 ),
-      new THREE.Vector3( 2, 0, -4 )
-    );
-      let points2 = cubeBezierCurve.getPoints(80);
-
-      const geometry2 = new LineGeometry();
-      let positions = [];
-      let colors = [];
-      const color = new THREE.Color();
-      for(let point of points){
-        positions.push(point.x,point.y,0);
-        color.setHSL(1,1.0,0.5);
-        colors.push(color.r, color.g, color.b);
-      }
-
-      let positions2 = [];
-      for(let point of points2){
-        positions2.push(point.x,point.y,point.z);
-      }
-      geometry2.setPositions(positions);
-
-
-      let geometry3 = new LineGeometry();
-      geometry3.setPositions(positions2);
-      
-      const lineMaterial = new LineMaterial({
-        color:0xff00ff,//设置颜色
-        linewidth:3,// 宽度
-        dashScale:2,
-        dashSize:2, // 复制的总长 2个单位一个循环
-        dashOffset:0,
-        lines:[0.1,0.4,0.5,0.8] // 指的是在0.1-0.4  0.5 -0.8中间挖空 最终的结果是 长度
-        // 总长为2个单位 类似于 [-   -   ------------]
-      })
-      
-      
-      lineMaterial.resolution.set(window.innerWidth,window.innerHeight); //将界面的宽高传进去对宽度至关重要
-      lineMaterial.defines.USE_DASH = "";// 是否设置为点划线
-      lineMaterial.needsUpdate = true;
-      
-
-      const lineMaterial2 = new LineMaterial({
-        color:0xcccc00,// 黄色
-        linewidth:2,// 宽度
-        dashScale:5,//越大越密集 默认值为1
-        dashSize:5,
-        dashOffset:0,//偏移量
-        lines:[
-          0.5,1.0,
-          1.2,1.7,
-          1.9,2.4
-        ] // 在0.5-1.0 1.2-1.7 1.9-2.4之间挖空 类似于[--  -  -  ---------------]
-      })
-      lineMaterial2.defines.USE_DASH = "";// 设置为点划线
-      lineMaterial2.resolution.set(window.innerWidth,window.innerHeight);
-      lineMaterial2.needsUpdate = true;
-
-
-      const dashedMaterial = new THREE.LineDashedMaterial( { scale: 2, dashSize: 1, gapSize: 1 } );
-      
-
-      this.line = new Line2(geometry2,lineMaterial);
-      this.line.computeLineDistances();
-      this.line.scale.set(1,1,1);
-      this.scene.add(this.line);
-
-      // 第二条贝塞尔曲线
-      
-      console.log('添加第二条曲线');
-      let line2 = new Line2(geometry3, lineMaterial2);
-      line2.computeLineDistances();
-      line2.scale.set(1,1,1);
-      this.scene.add(line2);
-      const material3 = lineMaterial2.clone();
-      material3.color = new THREE.Color(0x0033ee);//复制并且更改颜色
-      this.lineMaterial = material3;
-
-      console.log('添加第三条曲线');
-      let line3 = new Line2(geometry3, material3);
-      line3.computeLineDistances();
-      line3.rotation.set(0.3,0.3,0.3);
-      this.scene.add(line3);
-    },
-  
     initCubes(){
       const cube = new THREE.Mesh(
         new THREE.BoxBufferGeometry(0.1,0.1,0.1),
@@ -255,17 +148,146 @@ export default {
       const cubeGroup = new THREE.Group();
       for(let i = 0; i < 1000;i++){
         const cubeClone = cube.clone();
-        cubeClone.position.set(THREE.MathUtils.randFloat(-10,10),THREE.MathUtils.randFloat(-30,30),THREE.MathUtils.randFloat(-8,5));
+        cubeClone.position.set(THREE.MathUtils.randFloat(-30,30),THREE.MathUtils.randFloat(-30,30),THREE.MathUtils.randFloat(-30,30));
         
         cubeGroup.add(cubeClone);
       }
       
       this.cubeGroup = cubeGroup;
-      this.cubeGroup2 = cubeGroup.clone();
       this.cubeGroup.position.set(0,15,0);
-      this.cubeGroup2.position.set(0,75,0);
-      this.scene.add(this.cubeGroup2);
       this.scene.add(cubeGroup);
+    },
+    // 使用自定义的材质
+    initSpecialMaterial(){
+      const glsl = x => x[0].trim();
+      // 顶点着色器按照 MeshBasicMaterial;
+      const vert = glsl`
+        varying vec2 vUv;
+        #include <common>
+        #include <uv_pars_vertex>
+        #include <uv2_pars_vertex>
+        #include <envmap_pars_vertex>
+        #include <color_pars_vertex>
+        #include <fog_pars_vertex>
+        #include <morphtarget_pars_vertex>
+        #include <skinning_pars_vertex>
+        #include <logdepthbuf_pars_vertex>
+        #include <clipping_planes_pars_vertex>
+        void main() {
+          #include <uv_vertex>
+          #include <uv2_vertex>
+          #include <color_vertex>
+          #include <skinbase_vertex>
+          #ifdef USE_ENVMAP
+          #include <beginnormal_vertex>
+          #include <morphnormal_vertex>
+          #include <skinnormal_vertex>
+          #include <defaultnormal_vertex>
+          #endif
+          #include <begin_vertex>
+          #include <morphtarget_vertex>
+          #include <skinning_vertex>
+          #include <project_vertex>
+          #include <logdepthbuf_vertex>
+          #include <worldpos_vertex>
+          #include <clipping_planes_vertex>
+          #include <envmap_vertex>
+          #include <fog_vertex>
+        }
+      `;
+      const vert2 = glsl`
+        varying vec2 vUv;
+        void main()	{
+          vUv = uv;
+          gl_Position = vec4( position, 1.0 );
+        }
+      `
+      const frag = glsl`
+        precision highp float;
+        uniform float time;
+        uniform vec2 u_resolution;
+        varying vec2 vUv;
+        uniform sampler2D sampleTexture;
+        uniform vec2 textureWidthAndHeight;
+        void main() {
+          vec2 st = gl_FragCoord.xy/u_resolution.xy;
+          vec2 c1 = gl_FragCoord.xy/(u_resolution);
+          c1.x = c1.x * (u_resolution.x/u_resolution.y);
+          c1 *= (u_resolution.y/textureWidthAndHeight.y);
+          c1.x *= (textureWidthAndHeight.y/textureWidthAndHeight.x);
+          
+          vec4 color = texture2D(sampleTexture, c1);
+          gl_FragColor = color;//vec4(color,1.0);
+        }
+      `;
+      // z值在相机距离片源近时为0;
+      const texture = new THREE.TextureLoader().load("https://tow.oss-cn-hangzhou.aliyuncs.com/res/style3.png");
+      texture.minFilter = THREE.NearestFilter;
+      texture.magFilter = THREE.NearestFilter;
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+
+
+      const texture2 = new THREE.TextureLoader().load("https://tow.oss-cn-hangzhou.aliyuncs.com/res/style2.png");
+      texture2.minFilter = THREE.NearestFilter;
+      texture2.magFilter = THREE.NearestFilter;
+      texture2.wrapS = THREE.RepeatWrapping;
+      texture2.wrapT = THREE.RepeatWrapping;
+
+      this.uniforms = {
+        time: { type:'f', value:1.0 },
+        u_resolution: {type:'v2', value:new THREE.Vector2(100,100) },
+        sampleTexture: { type: "t", value:texture },
+        textureWidthAndHeight: { type:'v2', value:new THREE.Vector2(16,16)}
+      }
+
+      this.uniforms2 = {
+        time: { type:'f', value:1.0 },
+        u_resolution: {type:'v2', value:new THREE.Vector2(100,100) },
+        sampleTexture: { type: "t", value:texture2 },
+        textureWidthAndHeight: { type:'v2', value:new THREE.Vector2(16,16)}
+      }
+
+      
+      const geometry = new THREE.PlaneBufferGeometry(2, 2);
+      const material = new THREE.ShaderMaterial({
+        uniforms:this.uniforms,
+        vertexShader:vert,
+        fragmentShader:frag,
+        transparent:true
+      })
+
+      const material2 = new THREE.ShaderMaterial({
+        uniforms:this.uniforms2,
+        vertexShader:vert,
+        fragmentShader:frag,
+        transparent:true
+      })
+      const geometry2 = new THREE.CircleGeometry( 1, 32 );
+      const style2Mesh = new THREE.Mesh(geometry2, material2);
+      style2Mesh.position.set(0,2,0);
+      this.scene.add(style2Mesh);
+      
+
+      const basicMaterial = new THREE.MeshBasicMaterial({
+        color:0x00a0e9,
+        wireframe:true
+      })
+      const mesh = new THREE.Mesh(geometry,material);
+      const mesh2 = new THREE.Mesh(geometry,basicMaterial);
+      this.scene.add(mesh2);
+      this.scene.add(mesh);
+
+      this.onResize();
+      window.addEventListener('resize',this.onResize,false);
+
+    },
+    onResize(){
+      this.renderer.setSize(window.innerWidth,window.innerHeight);
+      this.uniforms2.u_resolution.value.x = this.renderer.domElement.width;
+      this.uniforms2.u_resolution.value.y = this.renderer.domElement.height;
+      this.uniforms.u_resolution.value.x = this.renderer.domElement.width;
+      this.uniforms.u_resolution.value.y = this.renderer.domElement.height;
     },
     render(){
       this.renderer.render(this.scene, this.camera);
