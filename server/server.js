@@ -18,6 +18,7 @@ const io = require("socket.io")(httpServer,{
     }
 });
 
+console.log('cpus')
 httpServer.listen(3001);
 
 

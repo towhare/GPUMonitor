@@ -97,7 +97,7 @@ export default {
   watch: {},
   mounted: function () {
     const MB = 1024*1024;
-    this.socket = io("http://192.168.1.12:3001");
+    this.socket = io("http://localhost:3001");
     this.socket.on("connect", (item) => {
       console.log("socket connected", this.socket.id);
       this.socketConneted = true;
