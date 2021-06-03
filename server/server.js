@@ -18,7 +18,6 @@ const io = require("socket.io")(httpServer,{
     }
 });
 
-console.log('cpus')
 httpServer.listen(3001);
 
 
@@ -29,7 +28,7 @@ httpServer.listen(3001);
 
 /** 按顺序 获取总内存 已用内存 可用内存 温度 gpu占用百分比 */
 const gpuCommand = 'nvidia-smi --format=csv,noheader --query-gpu=memory.total,memory.used,memory.free,temperature.gpu,utilization.gpu,encoder.stats.averageLatency';
-
+// const gpuCommand = "nvidia-smi"
 const options = {
     env: {
         ...process.env,
@@ -121,16 +120,13 @@ const getRaminfo = function(){
 
 const cpuInfomation = () => {
     const changedCpus = getChangedCpus();
-    //console.log('changedCpus',changedCpus)
     let log = '';
     for(let i = 0; i < changedCpus.length;i++){
         log += ' --cpu'+(i+1)+': ' +Math.round((changedCpus[i].used/changedCpus[i].all)*100) + '%-- ';
     }
-    //console.log(log);
 }
-//setInterval(cpuInfomation,2000);
 async function getGPUTemperature() {
-    const result = await execAsync(gpuCommand, options);
+    const result = await execAsync(gpuCommand, {windowsHide:true});
     if(result.stdout){
         let dataArray = result.stdout.replace('\r\n','').split(', ');
         // 如果是不支持的内容 则会显示[Not Supported];
@@ -157,7 +153,7 @@ async function getGPUTemperature() {
  * @returns {number|null} temperature 
  */
 async function getTemperature(){
-    const result = await execAsync(`nvidia-smi --format=csv,noheader --query-gpu=temperature.gpu`,options);
+    const result = await execAsync(`nvidia-smi --format=csv,noheader --query-gpu=temperature.gpu`,{windowsHide:true});
     if(result.stdout){
         const data = Number(result.stdout.replace('\r\n',''));
         if(data){
@@ -175,13 +171,18 @@ let pool = {
 }
 
 io.on('connection', socket => {
-    console.log('newConnection');
+    console.log('new client connect')
     const cpuinfoInstance = new CPUInfo();
     let pushGPUInfomation = async () => {
-        let info = await getGPUTemperature();
-        socket.emit('gpuInfo', info);
-        let temperature = await getTemperature();
-        socket.emit('temperature',temperature);
+        try{
+            let info = await getGPUTemperature();
+            socket.emit('gpuInfo', info);
+            let temperature = await getTemperature();
+            socket.emit('temperature',temperature);
+        } catch(error){
+            console.error(error);
+        }
+        
     }
 
     let pushCPUInformation = () => {
@@ -206,7 +207,6 @@ io.on('connection', socket => {
     }
 
     socket.on('disconnect',function(){
-        console.log('用户断开连接');
         if(pool[socket.id] && pool[socket.id].intervalId){
             clearInterval(pool[socket.id].intervalId);
             if(pool[socket.id].cpuIntervalId){
@@ -224,4 +224,5 @@ io.on('connection', socket => {
     socket.emit("hello", "world");
     
 })
-//getTemperature();
+// getTemperature();
+// getGPUTemperature();

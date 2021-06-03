@@ -3,6 +3,7 @@
 - 因为获取gpu信息是通过nvidia-smi命令行 所以确保你的电脑上有nvidia-smi
 - 前提是英伟达的显卡， AMD的， 没有AMD的显卡所以没法试
 - windows 10系统来说 nvidia-smi 一般在 `C:\\Program Files\\NVIDIA Corporation\\NVSMI\\`这个文件夹里
+- 新的英伟达驱动已经不需要原有的 nvidia-smi.exe文件了 所以可以直接运行
 
 ### 功能点
 - 解析 nvidia-smi的内容 并且展示出来
