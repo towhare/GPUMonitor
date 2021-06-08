@@ -2,7 +2,7 @@
  * electron 入口文件
  */
 const { fork } = require('child_process')
-const ps = fork(`${__dirname}/server/server.js`)
+// const ps = fork(`${__dirname}/server/server.js`)
 const { app, BrowserWindow } = require('electron')
 
 function createWindow () {

@@ -6,6 +6,7 @@ const httpServer = require("http").createServer();
 const execAsync = promisify(exec);
 const os = require('os');
 const { clear } = require('console');
+const si = require('systeminformation');
 
 const startCPUs = os.cpus();
 let oldCPUs = getCPUsCurrent();
@@ -18,7 +19,17 @@ const io = require("socket.io")(httpServer,{
     }
 });
 
-httpServer.listen(3001);
+
+// promises style - new since version 3
+function getCpuTemperature(){
+    si.cpuTemperature().then(data =>{
+        console.log('cpu temperature', data)
+    })
+}
+setInterval(()=>{
+    getCpuTemperature();
+},1000)
+httpServer.listen(3002);
 
 
 /** 下面的内容为获取gpu相关的内容 */
