@@ -26,10 +26,8 @@ function getCpuTemperature(){
         console.log('cpu temperature', data)
     })
 }
-setInterval(()=>{
-    getCpuTemperature();
-},1000)
-httpServer.listen(3002);
+
+httpServer.listen(3001);
 
 
 /** 下面的内容为获取gpu相关的内容 */
@@ -182,7 +180,6 @@ let pool = {
 }
 
 io.on('connection', socket => {
-    console.log('new client connect')
     const cpuinfoInstance = new CPUInfo();
     let pushGPUInfomation = async () => {
         try{

@@ -88,6 +88,7 @@ export default {
       position:absolute;
       bottom:0;
       background-color:  #53e5ff;
+      transition:all 1s;
     }
     .border{
       width:100%;

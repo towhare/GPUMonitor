@@ -30,6 +30,22 @@
       :total="memoryInfo.total"
       :current="memoryInfo.used"
     />
+    <div class="newRam">
+      <div class="controlBlock">
+        <div class="blockName">内存</div>
+        <percentage-bar :current="ramInUseInGB" :totalNumber="totalRamMemoryInGB"/>
+      </div>
+      <div class="controlBlock">
+        <div class="blockName">显存</div>
+        <percentage-bar :current="GPURamUsedMemoryInGB" :totalNumber="GPURamTotalMemoryInGB"/>
+      </div>
+      <div class="controlBlock">
+        <div class="blockName">显卡使用量</div>
+        <percentage-bar :current="(this.gpuInfo.gpuUsage * 32 / 100)" :totalNumber="32"/>
+      </div>
+      
+    </div>
+    
     <percentage :percent="gpuInfo.gpuUsage" class="usage" />
     <div class="cpus">
       <core v-for="(item,i) in cpuInfo" :key="i" :percent="item.percent"/>
@@ -42,6 +58,7 @@ import io from "socket.io-client";
 import axios from "axios";
 
 import Bar from "./component/tempratureBar.vue";
+import PercentageBar from './component/percentageBar.vue';
 import Percentage from "./component/circle.vue";
 import Core from "./component/core.vue";
 import THREEBackgrond from "./component/textBackground.vue";
@@ -66,6 +83,7 @@ export default {
     percentage: Percentage,
     "three-background": THREEBackgrond,
     "core":Core,
+    PercentageBar,
   },
   data: () => {
     return {
@@ -85,7 +103,6 @@ export default {
       memoryInfo:{
         total:0,
         used:0,
-
       },
       socketConneted:false,
       temperature: 0,
@@ -93,7 +110,35 @@ export default {
       backgroundPlaying:true
     };
   },
-  computed: {},
+  computed: {
+    totalRamMemoryInGB(){
+      const memoryInGB=(this.memoryInfo.total/1024);
+      console.log('memoryInGB',memoryInGB)
+      if(memoryInGB<=0){
+        console.log('return 1')
+        return 1
+      } else {
+        return Math.round(memoryInGB)
+      }
+    },
+    ramInUseInGB(){
+      
+      return (this.memoryInfo.used/1024);
+    },
+    GPURamTotalMemoryInGB(){
+      const gpuTotalMemoryInGB =  Math.round(this.gpuInfo.gpuTotalMemory/1024);
+      if(gpuTotalMemoryInGB<=0){
+        return 1;
+      } else {
+        return gpuTotalMemoryInGB;
+      }
+    },
+    GPURamUsedMemoryInGB(){
+      console.log('GPURamInuse',Math.round(this.gpuInfo.gpuMemoryUsed/1024))
+      return Math.round(this.gpuInfo.gpuMemoryUsed/1024);
+    },
+    
+  },
   watch: {},
   mounted: function () {
     const MB = 1024*1024;
@@ -118,6 +163,7 @@ export default {
       this.gpuInfo.gpuMemoryAvailable = info.gpuMemoryAvailable;
       this.gpuInfo.gpuTemperature = info.gpuTemperature;
       this.gpuInfo.gpuUsage = info.gpuUsage;
+      console.log('gpuUsage',this.gpuInfo.gpuUsage)
     });
 
     this.socket.on("ramInfo",info => {
@@ -151,6 +197,7 @@ export default {
   box-sizing: border-box;
 }
 .full-width {
+  color: #53e5ff;
   background-color: #222266;
   width: 100vw;
   height: 100vh;
@@ -175,6 +222,23 @@ export default {
     top:50%;
     left:50%;
     transform: translate(55%,-50%);
+  }
+  .newRam{
+    position:absolute;
+    top:20%;
+    left:50%;
+    width: 70%;
+    font-size:32px;
+    transform: translate(-50%,-50%);
+    .controlBlock{
+      padding:6px;
+      margin:20px 0;
+      // border:2px solid #53e5ff;
+      .blockName{
+        text-align: center;
+        margin:5px auto 10px auto;
+      }
+    }
   }
   .usage {
     position: absolute;
